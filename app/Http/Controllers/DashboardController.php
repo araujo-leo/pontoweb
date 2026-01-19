@@ -12,20 +12,16 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        // 1. Iniciar a Query carregando o projeto (para pegar o valor/hora)
-        // Filtrar apenas projetos do usuário logado
         $query = TimeEntry::with('project')
             ->whereHas('project', function ($q) {
                 $q->where('user_id', auth()->id());
             });
 
-        // 2. Filtro por Projeto
         if ($request->filled('project_id')) {
             $query->where('project_id', $request->project_id);
         }
 
-        // 3. Filtro por Tempo
-        $period = $request->input('period', 'this_month'); // Padrão: Mês atual
+        $period = $request->input('period', 'this_month');
 
         switch ($period) {
             case 'today':
@@ -42,25 +38,19 @@ class DashboardController extends Controller
                 $query->whereMonth('start_time', now()->subMonth()->month)
                     ->whereYear('start_time', now()->subMonth()->year);
                 break;
-            // 'all' não aplica filtro de data
         }
 
-        // Buscar os dados filtrados (ordenados do mais recente)
         $entries = $query->orderBy('start_time', 'desc')->get();
 
-        // 4. Calcular Totais (Earnings & Time)
-        // Fazemos isso no PHP para garantir precisão e formatar fácil
         $totalEarnings = 0;
         $totalMinutes = 0;
         $projectsActiveCount = $entries->pluck('project_id')->unique()->count();
 
         foreach ($entries as $entry) {
-            // Só calcula se já tiver terminado (end_time não nulo)
             if ($entry->end_time) {
                 $start = Carbon::parse($entry->start_time);
                 $end = Carbon::parse($entry->end_time);
 
-                // abs() para garantir positivo
                 $minutes = abs($end->diffInMinutes($start));
                 $totalMinutes += $minutes;
                 $totalEarnings += ($minutes / 60) * $entry->project->hourly_rate;
@@ -110,7 +100,6 @@ class DashboardController extends Controller
 
     private function getChartData($period)
     {
-        // Buscar entradas do usuário logado no mês atual
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
 
@@ -122,7 +111,6 @@ class DashboardController extends Controller
             ->whereNotNull('end_time')
             ->get();
 
-        // Agrupar por semana
         $weeks = [];
         for ($i = 0; $i < 4; $i++) {
             $weekStart = $startOfMonth->copy()->addWeeks($i);
