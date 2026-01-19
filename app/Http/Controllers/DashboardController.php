@@ -62,18 +62,15 @@ class DashboardController extends Controller
 
                 // abs() para garantir positivo
                 $minutes = abs($end->diffInMinutes($start));
-
                 $totalMinutes += $minutes;
                 $totalEarnings += ($minutes / 60) * $entry->project->hourly_rate;
             }
         }
 
-        // Formatar Horas (ex: "10h 30m")
         $h = floor($totalMinutes / 60);
         $m = $totalMinutes % 60;
         $totalTimeFormatted = sprintf('%dh %02dm', $h, $m);
 
-        // 5. Preparar "Atividade Recente" (Apenas os 5 últimos para o card)
         $recentActivity = $entries->take(5)->map(function ($entry) {
             $start = Carbon::parse($entry->start_time);
             $end = $entry->end_time ? Carbon::parse($entry->end_time) : null;
@@ -91,26 +88,21 @@ class DashboardController extends Controller
                 'project_name' => $entry->project->name,
                 'date' => $start->format('d/m'),
                 'duration' => $duration,
-                'earnings' => $earnings, // Valor numérico para formatar no front
+                'earnings' => $earnings,
             ];
         });
 
-        // 6. Preparar dados do gráfico (faturamento semanal do mês atual)
         $chartData = $this->getChartData($period);
 
         return Inertia::render('Dashboard', [
-            // Dados para os Cards
             'stats' => [
                 'totalEarnings' => $totalEarnings,
                 'totalTime' => $totalTimeFormatted,
                 'activeProjects' => $projectsActiveCount,
                 'entriesCount' => $entries->count(),
             ],
-            // Lista reduzida para o widget
             'recentActivity' => $recentActivity,
-            // Dados para o gráfico
             'chartData' => $chartData,
-            // Dados para popular os Selects de filtro
             'filters' => $request->only(['project_id', 'period']),
             'projects' => Project::where('user_id', auth()->id())->orderBy('name')->get(['id', 'name']),
         ]);

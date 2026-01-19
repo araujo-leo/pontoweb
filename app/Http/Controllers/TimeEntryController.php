@@ -11,7 +11,6 @@ class TimeEntryController extends Controller
 {
     public function index()
     {
-        // 1. Buscar dados brutos - apenas do usuário logado
         $rawEntries = TimeEntry::with('project')
             ->whereHas('project', function ($q) {
                 $q->where('user_id', auth()->id());
@@ -19,7 +18,6 @@ class TimeEntryController extends Controller
             ->orderBy('start_time', 'desc')
             ->get();
 
-        // 2. Processar cada entrada (calcular valores individuais)
         $processedEntries = $rawEntries->map(function ($entry) {
             $start = \Carbon\Carbon::parse($entry->start_time);
             $end = $entry->end_time ? \Carbon\Carbon::parse($entry->end_time) : null;
@@ -28,14 +26,13 @@ class TimeEntryController extends Controller
             $earnings = 0;
 
             if ($end) {
-                // abs() garante que não tenhamos números negativos se a hora estiver invertida
                 $durationInMinutes = abs($end->diffInMinutes($start));
                 $earnings = ($durationInMinutes / 60) * $entry->project->hourly_rate;
             }
 
             return [
                 'id' => $entry->id,
-                'project_id' => $entry->project_id, // Importante para o agrupamento
+                'project_id' => $entry->project_id,
                 'project_name' => $entry->project->name,
                 'hourly_rate' => $entry->project->hourly_rate,
                 'date' => $start->format('d/m/Y'),
@@ -49,11 +46,8 @@ class TimeEntryController extends Controller
             ];
         });
 
-        // 3. Criar o Resumo por Projeto (Agrupamento)
         $projectSummaries = $processedEntries->groupBy('project_id')->map(function ($group) {
             $totalMinutes = $group->sum('duration_minutes');
-
-            // Formatar horas totais do projeto (ex: 12h 30m)
             $h = floor($totalMinutes / 60);
             $m = $totalMinutes % 60;
 
@@ -64,17 +58,16 @@ class TimeEntryController extends Controller
                 'count' => $group->count(),
                 'hourly_rate' => $group->first()['hourly_rate']
             ];
-        })->values(); // Remove as chaves de ID para ficar um array limpo pro Vue
+        })->values();
 
-        // 4. Totais Gerais
         $grandTotalEarnings = $processedEntries->sum('earnings');
         $grandTotalMinutes = $processedEntries->sum('duration_minutes');
         $grandHours = floor($grandTotalMinutes / 60);
         $grandMinutes = $grandTotalMinutes % 60;
 
         return \Inertia\Inertia::render('TimeEntries/Index', [
-            'entries' => $processedEntries, // Lista detalhada
-            'projectSummaries' => $projectSummaries, // Novo resumo por projeto
+            'entries' => $processedEntries,
+            'projectSummaries' => $projectSummaries,
             'totalEarnings' => $grandTotalEarnings,
             'totalTime' => sprintf('%dh %02dm', $grandHours, $grandMinutes),
         ]);
@@ -87,7 +80,6 @@ class TimeEntryController extends Controller
             'description' => 'nullable|string|max:1000',
         ]);
 
-        // Verificar se o projeto pertence ao usuário logado
         $project = \App\Models\Project::where('id', $request->project_id)
             ->where('user_id', auth()->id())
             ->first();
@@ -123,7 +115,6 @@ class TimeEntryController extends Controller
             'description' => 'nullable|string|max:1000',
         ]);
 
-        // Verificar se a entrada pertence a um projeto do usuário logado
         $timeEntry = TimeEntry::with('project')
             ->whereHas('project', function ($q) {
                 $q->where('user_id', auth()->id());
@@ -133,7 +124,6 @@ class TimeEntryController extends Controller
 
         $timeEntry->end_time = now();
 
-        // Atualizar descrição se fornecida
         if ($request->filled('description')) {
             $timeEntry->description = $request->description;
         }
@@ -149,7 +139,6 @@ class TimeEntryController extends Controller
             'description' => 'required|string|max:1000',
         ]);
 
-        // Verificar se a entrada pertence a um projeto do usuário logado
         $timeEntry = TimeEntry::with('project')
             ->whereHas('project', function ($q) {
                 $q->where('user_id', auth()->id());
