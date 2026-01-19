@@ -10,7 +10,6 @@ import {
     CardTitle,
 } from '@/Components/ui/card';
 
-// --- Imports do Chart.js ---
 import { Bar } from 'vue-chartjs';
 import {
     Chart as ChartJS,
@@ -22,25 +21,21 @@ import {
     LinearScale,
 } from 'chart.js';
 
-// Registrar componentes do gráfico
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
-// --- Props vindas do Backend ---
 const props = defineProps({
-    stats: Object,          // Totais (earnings, time, counts)
-    recentActivity: Array,  // Lista dos últimos 5
-    filters: Object,        // Filtros atuais (period, project_id)
-    projects: Array,        // Lista para o dropdown
-    chartData: Object,      // Dados do gráfico semanal
+    stats: Object,
+    recentActivity: Array,
+    filters: Object,
+    projects: Array,
+    chartData: Object,
 });
 
-// --- Estado dos Filtros ---
 const filterForm = ref({
     period: props.filters.period || 'this_month',
     project_id: props.filters.project_id || '',
 });
 
-// Observar mudanças nos filtros para recarregar a página
 watch(filterForm, (newVal) => {
     router.get(route('dashboard'), newVal, {
         preserveState: true,
@@ -49,12 +44,10 @@ watch(filterForm, (newVal) => {
     });
 }, { deep: true });
 
-// --- Formatador de Moeda ---
 const formatCurrency = (value) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 };
 
-// --- Configuração do Gráfico (Dados dinâmicos do backend) ---
 const chartDataConfig = {
     labels: props.chartData.labels,
     datasets: [

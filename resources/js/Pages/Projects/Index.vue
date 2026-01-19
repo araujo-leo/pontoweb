@@ -5,7 +5,6 @@ import { computed, ref } from 'vue';
 
 const props = defineProps({ projects: Array });
 
-// -- LÓGICA DE PROJETOS E TIMER (A mesma que corrigimos antes) --
 const page = usePage();
 const flashError = computed(() => page.props.errors.error);
 

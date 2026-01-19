@@ -3,14 +3,12 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
 
-// Props vindas do Controller
 const props = defineProps({
     entries: Array,
     totalEarnings: Number,
     totalTime: String,
 });
 
-// Estado para gerenciar edição de descrição
 const editingDescription = ref(null);
 const descriptionForm = useForm({
     description: '',
@@ -36,7 +34,6 @@ const cancelEdit = () => {
     descriptionForm.reset();
 };
 
-// Formatador de Moeda
 const formatCurrency = (value) => {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 };
