@@ -1,0 +1,157 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Project;
+use App\Models\TimeEntry;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Carbon\Carbon;
+
+class DashboardController extends Controller
+{
+    public function index(Request $request)
+    {
+        // 1. Iniciar a Query carregando o projeto (para pegar o valor/hora)
+        // Filtrar apenas projetos do usuário logado
+        $query = TimeEntry::with('project')
+            ->whereHas('project', function ($q) {
+                $q->where('user_id', auth()->id());
+            });
+
+        // 2. Filtro por Projeto
+        if ($request->filled('project_id')) {
+            $query->where('project_id', $request->project_id);
+        }
+
+        // 3. Filtro por Tempo
+        $period = $request->input('period', 'this_month'); // Padrão: Mês atual
+
+        switch ($period) {
+            case 'today':
+                $query->whereDate('start_time', Carbon::today());
+                break;
+            case 'this_week':
+                $query->whereBetween('start_time', [now()->startOfWeek(), now()->endOfWeek()]);
+                break;
+            case 'this_month':
+                $query->whereMonth('start_time', now()->month)
+                    ->whereYear('start_time', now()->year);
+                break;
+            case 'last_month':
+                $query->whereMonth('start_time', now()->subMonth()->month)
+                    ->whereYear('start_time', now()->subMonth()->year);
+                break;
+            // 'all' não aplica filtro de data
+        }
+
+        // Buscar os dados filtrados (ordenados do mais recente)
+        $entries = $query->orderBy('start_time', 'desc')->get();
+
+        // 4. Calcular Totais (Earnings & Time)
+        // Fazemos isso no PHP para garantir precisão e formatar fácil
+        $totalEarnings = 0;
+        $totalMinutes = 0;
+        $projectsActiveCount = $entries->pluck('project_id')->unique()->count();
+
+        foreach ($entries as $entry) {
+            // Só calcula se já tiver terminado (end_time não nulo)
+            if ($entry->end_time) {
+                $start = Carbon::parse($entry->start_time);
+                $end = Carbon::parse($entry->end_time);
+
+                // abs() para garantir positivo
+                $minutes = abs($end->diffInMinutes($start));
+
+                $totalMinutes += $minutes;
+                $totalEarnings += ($minutes / 60) * $entry->project->hourly_rate;
+            }
+        }
+
+        // Formatar Horas (ex: "10h 30m")
+        $h = floor($totalMinutes / 60);
+        $m = $totalMinutes % 60;
+        $totalTimeFormatted = sprintf('%dh %02dm', $h, $m);
+
+        // 5. Preparar "Atividade Recente" (Apenas os 5 últimos para o card)
+        $recentActivity = $entries->take(5)->map(function ($entry) {
+            $start = Carbon::parse($entry->start_time);
+            $end = $entry->end_time ? Carbon::parse($entry->end_time) : null;
+            $earnings = 0;
+            $duration = 'Em andamento';
+
+            if ($end) {
+                $mins = abs($end->diffInMinutes($start));
+                $earnings = ($mins / 60) * $entry->project->hourly_rate;
+                $duration = $end->diff($start)->format('%H:%I');
+            }
+
+            return [
+                'id' => $entry->id,
+                'project_name' => $entry->project->name,
+                'date' => $start->format('d/m'),
+                'duration' => $duration,
+                'earnings' => $earnings, // Valor numérico para formatar no front
+            ];
+        });
+
+        // 6. Preparar dados do gráfico (faturamento semanal do mês atual)
+        $chartData = $this->getChartData($period);
+
+        return Inertia::render('Dashboard', [
+            // Dados para os Cards
+            'stats' => [
+                'totalEarnings' => $totalEarnings,
+                'totalTime' => $totalTimeFormatted,
+                'activeProjects' => $projectsActiveCount,
+                'entriesCount' => $entries->count(),
+            ],
+            // Lista reduzida para o widget
+            'recentActivity' => $recentActivity,
+            // Dados para o gráfico
+            'chartData' => $chartData,
+            // Dados para popular os Selects de filtro
+            'filters' => $request->only(['project_id', 'period']),
+            'projects' => Project::where('user_id', auth()->id())->orderBy('name')->get(['id', 'name']),
+        ]);
+    }
+
+    private function getChartData($period)
+    {
+        // Buscar entradas do usuário logado no mês atual
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
+        $entries = TimeEntry::with('project')
+            ->whereHas('project', function ($q) {
+                $q->where('user_id', auth()->id());
+            })
+            ->whereBetween('start_time', [$startOfMonth, $endOfMonth])
+            ->whereNotNull('end_time')
+            ->get();
+
+        // Agrupar por semana
+        $weeks = [];
+        for ($i = 0; $i < 4; $i++) {
+            $weekStart = $startOfMonth->copy()->addWeeks($i);
+            $weekEnd = $weekStart->copy()->endOfWeek();
+
+            $weekEarnings = $entries->filter(function ($entry) use ($weekStart, $weekEnd) {
+                $entryDate = Carbon::parse($entry->start_time);
+                return $entryDate->between($weekStart, $weekEnd);
+            })->sum(function ($entry) {
+                $start = Carbon::parse($entry->start_time);
+                $end = Carbon::parse($entry->end_time);
+                $minutes = abs($end->diffInMinutes($start));
+                return ($minutes / 60) * $entry->project->hourly_rate;
+            });
+
+            $weeks[] = round($weekEarnings, 2);
+        }
+
+        return [
+            'labels' => ['Sem 1', 'Sem 2', 'Sem 3', 'Sem 4'],
+            'values' => $weeks,
+        ];
+    }
+}
