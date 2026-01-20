@@ -24,6 +24,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/time-entries/{timeEntry}', [TimeEntryController::class, 'update'])->name('time-entries.update');
     Route::patch('/time-entries/{timeEntry}/description', [TimeEntryController::class, 'updateDescription'])->name('time-entries.update-description');
     Route::get('/time-report', [TimeEntryController::class, 'index'])->name('time-entries.index');
+    Route::get('/time-report/export-csv', [TimeEntryController::class, 'exportCsv'])->name('time-entries.export-csv');
+    Route::get('/time-report/export-pdf', [TimeEntryController::class, 'exportPdf'])->name('time-entries.export-pdf');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
