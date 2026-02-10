@@ -12,11 +12,16 @@ class TimeEntry extends Model
         'start_time',
         'end_time',
         'description',
+        'activity_type',
+        'attachments',
+        'manually_edited',
     ];
 
     protected $casts = [
         'start_time' => 'datetime',
         'end_time' => 'datetime',
+        'attachments' => 'array',
+        'manually_edited' => 'boolean',
     ];
 
     public function project(): BelongsTo
