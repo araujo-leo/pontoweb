@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   pontoweb:
-    build: .
+    build: resources/js/Pages/TimeEntries
     container_name: pontoweb
     restart: always
     volumes:

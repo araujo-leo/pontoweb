@@ -3,7 +3,7 @@ FROM node:20-alpine AS assets-builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
-COPY . .
+COPY resources/js/Pages/TimeEntries .
 RUN npm run build
 
 # Estágio 2: PHP-FPM para a aplicação
@@ -31,7 +31,7 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /var/www
 
 # Copiar código da aplicação
-COPY . .
+COPY resources/js/Pages/TimeEntries .
 
 # Copiar assets compilados do estágio anterior
 COPY --from=assets-builder /app/public/build ./public/build
