@@ -1,9 +1,9 @@
-# Estágio 1: Node.js para compilar assets (Inertia/Vite)
+# Estágio 1: Node.js para compilar assets (Vite)
 FROM node:20-alpine AS assets-builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm install
-COPY resources/js/Pages/TimeEntries .
+COPY . .
 RUN npm run build
 
 # Estágio 2: PHP-FPM para a aplicação
@@ -21,25 +21,23 @@ RUN apk add --no-cache \
     oniguruma-dev \
     icu-dev
 
-# Instalar extensões do PHP necessárias para Laravel
+# Instalar extensões do PHP
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install gd pdo pdo_mysql mbstring zip bcmath intl
 
-# Copiar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www
 
-# Copiar código da aplicação
-COPY resources/js/Pages/TimeEntries .
+# Copia TUDO o que está na raiz (onde está o artisan, app, etc)
+COPY . .
 
-# Copiar assets compilados do estágio anterior
+# Copia os assets que o Node acabou de gerar
 COPY --from=assets-builder /app/public/build ./public/build
 
-# Instalar dependências do PHP (sem dev para produção)
 RUN composer install --no-dev --optimize-autoloader
 
-# Permissões para o Laravel
+# Garante permissões nas pastas de escrita
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
 EXPOSE 9000
