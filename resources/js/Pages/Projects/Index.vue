@@ -17,6 +17,7 @@ const form = useForm({
 const timerForm = useForm({
     project_id: null,
     description: '',
+    activity_type: 'development',
 });
 
 const showDescriptionInput = ref(null);
@@ -29,9 +30,11 @@ const toggleDescriptionInput = (projectId) => {
     if (showDescriptionInput.value === projectId) {
         showDescriptionInput.value = null;
         timerForm.description = '';
+        timerForm.activity_type = 'development';
     } else {
         showDescriptionInput.value = projectId;
         timerForm.project_id = projectId;
+        timerForm.activity_type = 'development';
     }
 };
 
@@ -117,13 +120,31 @@ const formatCurrency = (value) => {
                             </div>
                             <div v-else>
                                 <div v-if="showDescriptionInput === project.id" class="space-y-2 mb-3">
-                                    <label class="text-xs text-gray-600 dark:text-gray-400">Descrição das atividades (opcional)</label>
-                                    <textarea
-                                        v-model="timerForm.description"
-                                        placeholder="Descreva o que você vai fazer..."
-                                        class="w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md text-sm resize-none"
-                                        rows="2"
-                                    ></textarea>
+                                    <div>
+                                        <label class="text-xs text-gray-600 dark:text-gray-400">Activity Type</label>
+                                        <select
+                                            v-model="timerForm.activity_type"
+                                            class="w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md text-sm"
+                                        >
+                                            <option value="development">Development</option>
+                                            <option value="maintenance">Maintenance</option>
+                                            <option value="meeting">Meeting</option>
+                                            <option value="research">Research</option>
+                                            <option value="documentation">Documentation</option>
+                                            <option value="review">Review</option>
+                                            <option value="support">Support</option>
+                                            <option value="planning">Planning</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs text-gray-600 dark:text-gray-400">Activity Description (optional)</label>
+                                        <textarea
+                                            v-model="timerForm.description"
+                                            placeholder="Describe what you'll be doing..."
+                                            class="w-full border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md text-sm resize-none"
+                                            rows="2"
+                                        ></textarea>
+                                    </div>
                                 </div>
                                 <div class="flex justify-end gap-2">
                                     <button
@@ -131,7 +152,7 @@ const formatCurrency = (value) => {
                                         @click="toggleDescriptionInput(project.id)"
                                         class="bg-gray-500 hover:bg-gray-600 text-white text-sm font-bold py-2 px-4 rounded"
                                     >
-                                        + Descrição
+                                        + Description
                                     </button>
                                     <button
                                         @click="startTimer(project.id)"
