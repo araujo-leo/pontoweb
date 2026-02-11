@@ -1,7 +1,6 @@
 <script setup>
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { useForm } from '@inertiajs/vue3';
 import { ref } from 'vue';
@@ -36,27 +35,27 @@ const updatePassword = () => {
 <template>
     <section>
         <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                Update Password
+            <h2 class="text-xl font-bold text-zinc-900">
+                Atualizar Senha
             </h2>
 
-            <p class="mt-1 text-sm text-gray-600">
-                Ensure your account is using a long, random password to stay
-                secure.
+            <p class="mt-2 text-sm text-zinc-500 leading-relaxed max-w-2xl">
+                Certifique-se de que sua conta esteja usando uma senha longa e aleatória para manter a segurança dos seus dados de faturamento.
             </p>
         </header>
 
-        <form @submit.prevent="updatePassword" class="mt-6 space-y-6">
+        <form @submit.prevent="updatePassword" class="mt-8 space-y-6 max-w-xl">
             <div>
-                <InputLabel for="current_password" value="Current Password" />
+                <InputLabel for="current_password" value="Senha Atual" class="text-zinc-700 font-medium" />
 
                 <TextInput
                     id="current_password"
                     ref="currentPasswordInput"
                     v-model="form.current_password"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="mt-1.5 block w-full !rounded-xl !border-zinc-200 focus:!border-emerald-500 focus:!ring-emerald-500 transition-all shadow-sm"
                     autocomplete="current-password"
+                    placeholder="••••••••"
                 />
 
                 <InputError
@@ -65,55 +64,66 @@ const updatePassword = () => {
                 />
             </div>
 
-            <div>
-                <InputLabel for="password" value="New Password" />
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                    <InputLabel for="password" value="Nova Senha" class="text-zinc-700 font-medium" />
 
-                <TextInput
-                    id="password"
-                    ref="passwordInput"
-                    v-model="form.password"
-                    type="password"
-                    class="mt-1 block w-full"
-                    autocomplete="new-password"
-                />
+                    <TextInput
+                        id="password"
+                        ref="passwordInput"
+                        v-model="form.password"
+                        type="password"
+                        class="mt-1.5 block w-full !rounded-xl !border-zinc-200 focus:!border-emerald-500 focus:!ring-emerald-500 transition-all shadow-sm"
+                        autocomplete="new-password"
+                        placeholder="Mín. 8 caracteres"
+                    />
+                </div>
 
-                <InputError :message="form.errors.password" class="mt-2" />
+                <div>
+                    <InputLabel
+                        for="password_confirmation"
+                        value="Confirmar Nova Senha"
+                        class="text-zinc-700 font-medium"
+                    />
+
+                    <TextInput
+                        id="password_confirmation"
+                        v-model="form.password_confirmation"
+                        type="password"
+                        class="mt-1.5 block w-full !rounded-xl !border-zinc-200 focus:!border-emerald-500 focus:!ring-emerald-500 transition-all shadow-sm"
+                        autocomplete="new-password"
+                        placeholder="Repita a senha"
+                    />
+                </div>
+
+                <InputError :message="form.errors.password" class="col-span-full -mt-4" />
+                <InputError :message="form.errors.password_confirmation" class="col-span-full -mt-4" />
             </div>
 
-            <div>
-                <InputLabel
-                    for="password_confirmation"
-                    value="Confirm Password"
-                />
-
-                <TextInput
-                    id="password_confirmation"
-                    v-model="form.password_confirmation"
-                    type="password"
-                    class="mt-1 block w-full"
-                    autocomplete="new-password"
-                />
-
-                <InputError
-                    :message="form.errors.password_confirmation"
-                    class="mt-2"
-                />
-            </div>
-
-            <div class="flex items-center gap-4">
-                <PrimaryButton :disabled="form.processing">Save</PrimaryButton>
+            <div class="flex items-center gap-4 pt-2">
+                <button
+                    type="submit"
+                    class="inline-flex items-center justify-center rounded-xl bg-zinc-900 px-6 py-3 text-sm font-semibold text-white hover:bg-zinc-800 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:ring-offset-2 transition-all shadow-lg shadow-zinc-900/10 disabled:opacity-50"
+                    :disabled="form.processing"
+                >
+                    Salvar Alterações
+                </button>
 
                 <Transition
-                    enter-active-class="transition ease-in-out"
-                    enter-from-class="opacity-0"
-                    leave-active-class="transition ease-in-out"
+                    enter-active-class="transition ease-in-out duration-300"
+                    enter-from-class="opacity-0 translate-x-2"
+                    enter-to-class="opacity-100 translate-x-0"
+                    leave-active-class="transition ease-in-out duration-300"
                     leave-to-class="opacity-0"
                 >
                     <p
                         v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600"
+                        class="text-sm font-medium text-emerald-600 flex items-center gap-1"
                     >
-                        Saved.
+                        <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                        Senha atualizada!
                     </p>
                 </Transition>
             </div>

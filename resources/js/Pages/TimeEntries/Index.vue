@@ -126,9 +126,7 @@ const cancelEdit = () => {
 
 const startManualEdit = (entry) => {
     editingEntry.value = entry.id;
-
-    // Convert date and time back to datetime-local format
-    const dateStr = entry.date.split('/').reverse().join('-'); // Convert dd/mm/yyyy to yyyy-mm-dd
+    const dateStr = entry.date.split('/').reverse().join('-');
     manualEditForm.start_time = `${dateStr}T${entry.start_time}`;
     manualEditForm.end_time = entry.end_time !== '...' ? `${dateStr}T${entry.end_time}` : '';
     manualEditForm.description = entry.description || '';
@@ -174,30 +172,30 @@ const deleteAttachment = (entryId, index) => {
 
 const getActivityTypeLabel = (type) => {
     const labels = {
-        'development': 'Development',
-        'maintenance': 'Maintenance',
-        'meeting': 'Meeting',
-        'research': 'Research',
-        'documentation': 'Documentation',
+        'development': 'Desenvolvimento',
+        'maintenance': 'Manutenção',
+        'meeting': 'Reunião',
+        'research': 'Pesquisa',
+        'documentation': 'Documentação',
         'review': 'Review',
-        'support': 'Support',
-        'planning': 'Planning'
+        'support': 'Suporte',
+        'planning': 'Planejamento'
     };
     return labels[type] || type;
 };
 
 const getActivityTypeColor = (type) => {
     const colors = {
-        'development': 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-        'maintenance': 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300',
-        'meeting': 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300',
-        'research': 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300',
-        'documentation': 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-        'review': 'bg-pink-100 text-pink-800 dark:bg-pink-900 dark:text-pink-300',
-        'support': 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
-        'planning': 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900 dark:text-indigo-300'
+        'development': 'bg-emerald-50 text-emerald-700',
+        'maintenance': 'bg-amber-50 text-amber-700',
+        'meeting': 'bg-zinc-100 text-zinc-700',
+        'research': 'bg-blue-50 text-blue-700',
+        'documentation': 'bg-indigo-50 text-indigo-700',
+        'review': 'bg-purple-50 text-purple-700',
+        'support': 'bg-rose-50 text-rose-700',
+        'planning': 'bg-sky-50 text-sky-700'
     };
-    return colors[type] || colors['development'];
+    return colors[type] || 'bg-zinc-50 text-zinc-700';
 };
 
 const formatCurrency = (value) => {
@@ -210,469 +208,223 @@ const formatCurrency = (value) => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                Extrato de Horas
-            </h2>
-        </template>
-
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
-
-                <!-- Filters Section -->
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <!-- Predefined Periods -->
-                    <div class="mb-6">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                            Período Rápido
-                        </label>
-                        <div class="flex flex-wrap gap-2">
-                            <button
-                                @click="setPeriod('today')"
-                                :class="[
-                                    'px-4 py-2 text-sm rounded-md transition',
-                                    filterForm.period === 'today'
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                ]"
-                            >
-                                Hoje
-                            </button>
-                            <button
-                                @click="setPeriod('this_week')"
-                                :class="[
-                                    'px-4 py-2 text-sm rounded-md transition',
-                                    filterForm.period === 'this_week'
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                ]"
-                            >
-                                Esta Semana
-                            </button>
-                            <button
-                                @click="setPeriod('last_week')"
-                                :class="[
-                                    'px-4 py-2 text-sm rounded-md transition',
-                                    filterForm.period === 'last_week'
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                ]"
-                            >
-                                Semana Passada
-                            </button>
-                            <button
-                                @click="setPeriod('this_month')"
-                                :class="[
-                                    'px-4 py-2 text-sm rounded-md transition',
-                                    filterForm.period === 'this_month'
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                ]"
-                            >
-                                Este Mês
-                            </button>
-                            <button
-                                @click="setPeriod('last_month')"
-                                :class="[
-                                    'px-4 py-2 text-sm rounded-md transition',
-                                    filterForm.period === 'last_month'
-                                        ? 'bg-indigo-600 text-white'
-                                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-                                ]"
-                            >
-                                Mês Passado
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Custom Date Filters -->
-                    <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                            Período Personalizado
-                        </label>
-                        <div class="flex flex-col md:flex-row gap-4 items-end">
-                            <div class="flex-1 space-y-4 md:space-y-0 md:flex md:gap-4">
-                                <div class="flex-1">
-                                    <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                                        Data Inicial
-                                    </label>
-                                    <input
-                                        v-model="filterForm.start_date"
-                                        @input="filterForm.period = ''"
-                                        type="date"
-                                        class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500"
-                                    />
-                                </div>
-
-                                <div class="flex-1">
-                                    <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                                        Data Final
-                                    </label>
-                                    <input
-                                        v-model="filterForm.end_date"
-                                        @input="filterForm.period = ''"
-                                        type="date"
-                                        class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500"
-                                    />
-                                </div>
-
-                                <div class="flex-1">
-                                    <label class="block text-xs text-gray-600 dark:text-gray-400 mb-1">
-                                        Projeto
-                                    </label>
-                                    <select
-                                        v-model="filterForm.project_id"
-                                        class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 text-sm focus:ring-indigo-500 focus:border-indigo-500"
-                                    >
-                                        <option value="">Todos os Projetos</option>
-                                        <option v-for="project in projects" :key="project.id" :value="project.id">
-                                            {{ project.name }}
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            <div class="flex gap-2">
-                                <button
-                                    @click="clearFilters"
-                                    class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white text-sm rounded-md transition"
-                                >
-                                    Limpar
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <div class="flex gap-2 justify-end">
-                            <button
-                                @click="exportCsv"
-                                class="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-md transition"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                </svg>
-                                Exportar CSV
-                            </button>
-                            <button
-                                @click="exportPdf"
-                                class="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-md transition"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                                </svg>
-                                Exportar PDF
-                            </button>
-                        </div>
-                    </div>
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold tracking-tight text-zinc-900">Extrato de Horas</h2>
+                    <p class="text-sm text-zinc-500">Analise seu tempo e exporte relatórios para seus clientes.</p>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
-                        <div class="text-gray-500 dark:text-gray-400 text-sm uppercase font-bold tracking-wider">Total Faturado</div>
-                        <div class="text-3xl font-bold text-green-600 dark:text-green-400 mt-2">
+                <div class="flex gap-2">
+                    <button @click="exportCsv" class="inline-flex items-center gap-2 px-4 py-2 bg-white border border-zinc-200 rounded-xl text-sm font-semibold text-zinc-700 hover:bg-zinc-50 transition shadow-sm">
+                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                        CSV
+                    </button>
+                    <button @click="exportPdf" class="inline-flex items-center gap-2 px-4 py-2 bg-zinc-900 rounded-xl text-sm font-semibold text-white hover:bg-zinc-800 transition shadow-lg shadow-zinc-900/10">
+                        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                        Exportar PDF
+                    </button>
+                </div>
+            </div>
+        </template>
+
+        <div class="py-10 bg-zinc-50/50 min-h-screen">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white border-none shadow-sm shadow-zinc-200/50 ring-1 ring-zinc-200/60 rounded-3xl p-6">
+                        <div class="text-zinc-500 text-xs font-bold uppercase tracking-wider">Total Faturado</div>
+                        <div class="text-3xl font-bold text-zinc-900 mt-2 flex items-baseline gap-2">
                             {{ formatCurrency(totalEarnings) }}
+                            <span class="text-emerald-500 text-sm font-medium">no período</span>
                         </div>
                     </div>
 
-                    <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
-                        <div class="text-gray-500 dark:text-gray-400 text-sm uppercase font-bold tracking-wider">Tempo Total Trabalhado</div>
-                        <div class="text-3xl font-bold text-indigo-600 dark:text-indigo-400 mt-2">
+                    <div class="bg-white border-none shadow-sm shadow-zinc-200/50 ring-1 ring-zinc-200/60 rounded-3xl p-6">
+                        <div class="text-zinc-500 text-xs font-bold uppercase tracking-wider">Tempo Trabalhado</div>
+                        <div class="text-3xl font-bold text-zinc-900 mt-2">
                             {{ totalTime }}
                         </div>
                     </div>
                 </div>
 
-                <!-- Activity Type Summaries -->
-                <div v-if="activitySummaries && activitySummaries.length > 0" class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
-                    <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                        Resumo por Tipo de Atividade
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div
-                            v-for="summary in activitySummaries"
-                            :key="summary.type"
-                            class="border border-gray-200 dark:border-gray-700 rounded-lg p-4"
-                        >
-                            <div class="flex items-center justify-between mb-2">
-                                <span :class="['text-xs font-semibold px-2.5 py-1 rounded', getActivityTypeColor(summary.type)]">
-                                    {{ summary.label }}
-                                </span>
-                                <span class="text-xs text-gray-500 dark:text-gray-400">
-                                    {{ summary.count }} registro(s)
-                                </span>
-                            </div>
-                            <div class="mt-3">
-                                <div class="text-sm text-gray-600 dark:text-gray-400">Tempo Total</div>
-                                <div class="text-xl font-bold text-indigo-600 dark:text-indigo-400 mt-1">
-                                    {{ summary.total_time }}
-                                </div>
-                            </div>
-                            <div class="mt-2">
-                                <div class="text-sm text-gray-600 dark:text-gray-400">Valor Total</div>
-                                <div class="text-xl font-bold text-green-600 dark:text-green-400 mt-1">
-                                    {{ formatCurrency(summary.total_earnings) }}
-                                </div>
-                            </div>
+                <div class="bg-white border-none shadow-sm shadow-zinc-200/50 ring-1 ring-zinc-200/60 rounded-3xl overflow-hidden p-6">
+                    <div class="flex flex-col space-y-6">
+                        <div class="flex flex-wrap gap-2">
+                            <button v-for="p in ['today', 'this_week', 'last_week', 'this_month', 'last_month']"
+                                    :key="p"
+                                    @click="setPeriod(p)"
+                                    :class="[
+                                    'px-4 py-2 text-sm font-medium rounded-full transition-all',
+                                    filterForm.period === p
+                                        ? 'bg-zinc-900 text-white shadow-lg shadow-zinc-900/10'
+                                        : 'bg-zinc-100 text-zinc-600 hover:bg-zinc-200'
+                                ]"
+                            >
+                                {{ {today:'Hoje', this_week:'Esta Semana', last_week:'Semana Passada', this_month:'Este Mês', last_month:'Mês Passado'}[p] }}
+                            </button>
                         </div>
-                    </div>
-                </div>
 
-                <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-gray-900 dark:text-gray-100">
-                        <h3 class="text-lg font-medium mb-4">Histórico Detalhado</h3>
-
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                <tr>
-                                    <th scope="col" class="px-6 py-3">Data</th>
-                                    <th scope="col" class="px-6 py-3">Projeto</th>
-                                    <th scope="col" class="px-6 py-3">Tipo</th>
-                                    <th scope="col" class="px-6 py-3">Entrada</th>
-                                    <th scope="col" class="px-6 py-3">Saída</th>
-                                    <th scope="col" class="px-6 py-3">Duração</th>
-                                    <th scope="col" class="px-6 py-3">Descrição</th>
-                                    <th scope="col" class="px-6 py-3">Anexos</th>
-                                    <th scope="col" class="px-6 py-3 text-right">Valor Gerado</th>
-                                    <th scope="col" class="px-6 py-3 text-center">Ações</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr v-for="entry in entries" :key="entry.id" class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-
-                                    <td class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {{ entry.date }}
-                                        <span v-if="entry.manually_edited" class="ml-1 text-xs text-orange-500" title="Editado manualmente">✏️</span>
-                                    </td>
-
-                                    <td class="px-6 py-4">
-                                        <span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-blue-900 dark:text-blue-300">
-                                            {{ entry.project_name }}
-                                        </span>
-                                    </td>
-
-                                    <td class="px-6 py-4">
-                                        <span :class="['text-xs font-medium px-2.5 py-0.5 rounded', getActivityTypeColor(entry.activity_type)]">
-                                            {{ getActivityTypeLabel(entry.activity_type) }}
-                                        </span>
-                                    </td>
-
-                                    <td class="px-6 py-4">
-                                        {{ entry.start_time }}
-                                    </td>
-
-                                    <td class="px-6 py-4">
-                                        <span v-if="entry.is_active" class="text-red-500 animate-pulse font-bold">
-                                            ...
-                                        </span>
-                                        <span v-else>
-                                            {{ entry.end_time }}
-                                        </span>
-                                    </td>
-
-                                    <td class="px-6 py-4 font-mono">
-                                        {{ entry.duration_formatted }}
-                                    </td>
-
-                                    <td class="px-6 py-4 max-w-xs">
-                                        <div v-if="editingDescription === entry.id" class="space-y-2">
-                                            <textarea
-                                                v-model="descriptionForm.description"
-                                                class="w-full text-xs border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-md resize-none"
-                                                rows="2"
-                                                placeholder="Descreva as atividades..."
-                                            ></textarea>
-                                            <div class="flex gap-1">
-                                                <button
-                                                    @click="saveDescription(entry.id)"
-                                                    class="px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded"
-                                                    :disabled="descriptionForm.processing"
-                                                >
-                                                    Salvar
-                                                </button>
-                                                <button
-                                                    @click="cancelEdit"
-                                                    class="px-2 py-1 bg-gray-500 hover:bg-gray-600 text-white text-xs rounded"
-                                                >
-                                                    Cancelar
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div v-else class="group flex items-start gap-2">
-                                            <span class="text-xs text-gray-600 dark:text-gray-400 flex-1">
-                                                {{ entry.description || 'Sem descrição' }}
-                                            </span>
-                                            <button
-                                                @click="startEditDescription(entry.id, entry.description)"
-                                                class="opacity-0 group-hover:opacity-100 text-indigo-600 hover:text-indigo-800 text-xs"
-                                                title="Editar descrição"
-                                            >
-                                                ✏️
-                                            </button>
-                                        </div>
-                                    </td>
-
-                                    <td class="px-6 py-4">
-                                        <div class="space-y-1">
-                                            <div v-for="(attachment, index) in entry.attachments" :key="index" class="flex items-center gap-1 text-xs">
-                                                <a :href="attachment.download_url" class="text-blue-600 hover:underline flex-1 truncate max-w-[100px]">
-                                                    {{ attachment.filename }}
-                                                </a>
-                                                <button
-                                                    @click="deleteAttachment(entry.id, attachment.index)"
-                                                    class="text-red-600 hover:text-red-800"
-                                                    title="Remover"
-                                                >
-                                                    🗑️
-                                                </button>
-                                            </div>
-                                            <input
-                                                type="file"
-                                                :ref="`file-${entry.id}`"
-                                                @change="handleFileUpload($event, entry.id)"
-                                                accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
-                                                class="hidden"
-                                            />
-                                            <button
-                                                @click="$refs[`file-${entry.id}`][0].click()"
-                                                class="text-xs text-green-600 hover:text-green-800"
-                                                :disabled="attachmentForm.processing"
-                                            >
-                                                + Anexar
-                                            </button>
-                                        </div>
-                                    </td>
-
-                                    <td class="px-6 py-4 text-right font-bold text-gray-900 dark:text-white">
-                                        <span v-if="!entry.is_active">
-                                            {{ formatCurrency(entry.earnings) }}
-                                        </span>
-                                        <span v-else class="text-xs text-gray-400">
-                                            calculando...
-                                        </span>
-                                    </td>
-
-                                    <td class="px-6 py-4 text-center">
-                                        <button
-                                            v-if="!entry.is_active"
-                                            @click="startManualEdit(entry)"
-                                            class="text-indigo-600 hover:text-indigo-800 text-sm"
-                                            title="Editar horários"
-                                        >
-                                            ⚙️
-                                        </button>
-                                    </td>
-                                </tr>
-
-                                <tr v-if="entries.length === 0">
-                                    <td colspan="10" class="px-6 py-10 text-center text-gray-500">
-                                        Nenhum registro encontrado. Comece a trabalhar! 💼
-                                    </td>
-                                </tr>
-
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Modal de Edição Manual -->
-        <div v-if="editingEntry" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-            <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" @click="cancelManualEdit"></div>
-
-                <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-
-                <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                    <div class="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <h3 class="text-lg font-medium text-gray-900 dark:text-gray-100 mb-4">
-                            Editar Registro Manualmente
-                        </h3>
-
-                        <div class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Data e Hora de Início
-                                </label>
-                                <input
-                                    v-model="manualEditForm.start_time"
-                                    type="datetime-local"
-                                    class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                                />
-                                <div v-if="manualEditForm.errors.start_time" class="text-red-600 text-xs mt-1">
-                                    {{ manualEditForm.errors.start_time }}
-                                </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-zinc-100 pt-6">
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-zinc-500 uppercase">Data Inicial</label>
+                                <input v-model="filterForm.start_date" type="date" class="w-full rounded-xl border-zinc-200 text-sm focus:ring-emerald-500 focus:border-emerald-500" />
                             </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Data e Hora de Término
-                                </label>
-                                <input
-                                    v-model="manualEditForm.end_time"
-                                    type="datetime-local"
-                                    class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                                />
-                                <div v-if="manualEditForm.errors.end_time" class="text-red-600 text-xs mt-1">
-                                    {{ manualEditForm.errors.end_time }}
-                                </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-zinc-500 uppercase">Data Final</label>
+                                <input v-model="filterForm.end_date" type="date" class="w-full rounded-xl border-zinc-200 text-sm focus:ring-emerald-500 focus:border-emerald-500" />
                             </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Activity Type
-                                </label>
-                                <select
-                                    v-model="manualEditForm.activity_type"
-                                    class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                                >
-                                    <option value="development">Development</option>
-                                    <option value="maintenance">Maintenance</option>
-                                    <option value="meeting">Meeting</option>
-                                    <option value="research">Research</option>
-                                    <option value="documentation">Documentation</option>
-                                    <option value="review">Review</option>
-                                    <option value="support">Support</option>
-                                    <option value="planning">Planning</option>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-zinc-500 uppercase">Projeto</label>
+                                <select v-model="filterForm.project_id" class="w-full rounded-xl border-zinc-200 text-sm focus:ring-emerald-500 focus:border-emerald-500">
+                                    <option value="">Todos os Projetos</option>
+                                    <option v-for="project in projects" :key="project.id" :value="project.id">{{ project.name }}</option>
                                 </select>
                             </div>
+                        </div>
+                    </div>
+                </div>
 
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Descrição
-                                </label>
-                                <textarea
-                                    v-model="manualEditForm.description"
-                                    rows="3"
-                                    class="w-full rounded-md border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:ring-indigo-500 focus:border-indigo-500"
-                                    placeholder="Descreva as atividades realizadas..."
-                                ></textarea>
+                <div v-if="activitySummaries?.length" class="space-y-4">
+                    <h3 class="text-lg font-bold text-zinc-900">Resumo por Atividade</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div v-for="summary in activitySummaries" :key="summary.type"
+                             class="bg-white p-5 rounded-2xl ring-1 ring-zinc-100 shadow-sm border-t-4 transition-transform hover:-translate-y-1"
+                             :style="{ borderTopColor: 'currentColor' }"
+                             :class="getActivityTypeColor(summary.type)"
+                        >
+                            <div class="flex justify-between items-start mb-4 text-zinc-900">
+                                <span class="text-xs font-bold uppercase tracking-wider">{{ summary.label }}</span>
+                                <span class="text-[10px] opacity-70 bg-white/50 px-2 py-0.5 rounded-full">{{ summary.count }} logs</span>
+                            </div>
+                            <div class="space-y-1 text-zinc-900">
+                                <div class="text-xl font-bold">{{ summary.total_time }}</div>
+                                <div class="text-sm font-medium opacity-80">{{ formatCurrency(summary.total_earnings) }}</div>
                             </div>
                         </div>
                     </div>
+                </div>
 
-                    <div class="bg-gray-50 dark:bg-gray-700 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
-                        <button
-                            type="button"
-                            @click="saveManualEdit(editingEntry)"
-                            :disabled="manualEditForm.processing"
-                            class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50"
-                        >
-                            Salvar
-                        </button>
-                        <button
-                            type="button"
-                            @click="cancelManualEdit"
-                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-800 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
-                        >
-                            Cancelar
-                        </button>
+                <div class="bg-white border-none shadow-sm shadow-zinc-200/50 ring-1 ring-zinc-200/60 rounded-3xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-zinc-100 flex justify-between items-center">
+                        <h3 class="text-lg font-bold text-zinc-900">Histórico Detalhado</h3>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-[10px] text-zinc-400 uppercase tracking-widest bg-zinc-50/50">
+                            <tr>
+                                <th class="px-6 py-4">Data/Projeto</th>
+                                <th class="px-6 py-4">Tipo</th>
+                                <th class="px-6 py-4">Horário/Duração</th>
+                                <th class="px-6 py-4">Descrição/Anexos</th>
+                                <th class="px-6 py-4 text-right">Valor</th>
+                                <th class="px-6 py-4"></th>
+                            </tr>
+                            </thead>
+                            <tbody class="divide-y divide-zinc-100">
+                            <tr v-for="entry in entries" :key="entry.id" class="group hover:bg-zinc-50/80 transition-colors">
+                                <td class="px-6 py-4">
+                                    <div class="font-bold text-zinc-900">{{ entry.date }}</div>
+                                    <div class="text-[10px] font-bold text-emerald-600 mt-1 uppercase">{{ entry.project_name }}</div>
+                                </td>
+
+                                <td class="px-6 py-4">
+                                        <span :class="['text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-tighter', getActivityTypeColor(entry.activity_type)]">
+                                            {{ getActivityTypeLabel(entry.activity_type) }}
+                                        </span>
+                                </td>
+
+                                <td class="px-6 py-4 font-mono text-zinc-600">
+                                    <div class="text-xs">{{ entry.start_time }} — {{ entry.is_active ? 'Ativo' : entry.end_time }}</div>
+                                    <div class="text-sm font-bold text-zinc-900">{{ entry.duration_formatted }}</div>
+                                </td>
+
+                                <td class="px-6 py-4 max-w-xs">
+                                    <div v-if="editingDescription === entry.id" class="space-y-2">
+                                        <textarea v-model="descriptionForm.description" class="w-full text-xs rounded-lg border-zinc-200" rows="2"></textarea>
+                                        <div class="flex gap-2">
+                                            <button @click="saveDescription(entry.id)" class="text-[10px] bg-emerald-600 text-white px-2 py-1 rounded">Salvar</button>
+                                            <button @click="cancelEdit" class="text-[10px] bg-zinc-200 text-zinc-600 px-2 py-1 rounded">Cancelar</button>
+                                        </div>
+                                    </div>
+                                    <div v-else class="relative group/desc">
+                                        <p class="text-xs text-zinc-500 leading-relaxed italic">"{{ entry.description || 'Sem descrição' }}"</p>
+                                        <button @click="startEditDescription(entry.id, entry.description)" class="absolute -right-6 top-0 opacity-0 group-hover/desc:opacity-100 text-zinc-400">✏️</button>
+
+                                        <div class="flex flex-wrap gap-2 mt-2">
+                                            <div v-for="(file, i) in entry.attachments" :key="i" class="flex items-center gap-1 bg-zinc-100 px-1.5 py-0.5 rounded text-[10px]">
+                                                <a :href="file.download_url" class="truncate max-w-[80px] hover:text-emerald-600">{{ file.filename }}</a>
+                                                <button @click="deleteAttachment(entry.id, file.index)" class="text-zinc-400 hover:text-red-500">×</button>
+                                            </div>
+                                            <input type="file" :ref="`file-${entry.id}`" @change="handleFileUpload($event, entry.id)" class="hidden" />
+                                            <button @click="$refs[`file-${entry.id}`][0].click()" class="text-emerald-600 font-bold text-[10px] hover:underline">+ Anexo</button>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <td class="px-6 py-4 text-right">
+                                    <div class="text-sm font-bold text-zinc-900">{{ entry.is_active ? '--' : formatCurrency(entry.earnings) }}</div>
+                                    <div v-if="entry.manually_edited" class="text-[9px] text-amber-500 font-bold uppercase">Editado manual</div>
+                                </td>
+
+                                <td class="px-6 py-4 text-right">
+                                    <button v-if="!entry.is_active" @click="startManualEdit(entry)" class="p-2 text-zinc-400 hover:text-zinc-900 transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr v-if="entries.length === 0">
+                                <td colspan="6" class="px-6 py-12 text-center text-zinc-400 italic">Nenhum registro encontrado para este filtro.</td>
+                            </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
+
+        <Transition name="fade">
+            <div v-if="editingEntry" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div class="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" @click="cancelManualEdit"></div>
+                <div class="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg overflow-hidden animate-in zoom-in duration-300">
+                    <div class="p-8">
+                        <h3 class="text-xl font-bold text-zinc-900 mb-6">Editar Registro</h3>
+                        <div class="space-y-5">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-1.5">
+                                    <label class="text-xs font-bold text-zinc-500 uppercase">Início</label>
+                                    <input v-model="manualEditForm.start_time" type="datetime-local" class="w-full rounded-xl border-zinc-200 text-sm" />
+                                </div>
+                                <div class="space-y-1.5">
+                                    <label class="text-xs font-bold text-zinc-500 uppercase">Fim</label>
+                                    <input v-model="manualEditForm.end_time" type="datetime-local" class="w-full rounded-xl border-zinc-200 text-sm" />
+                                </div>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-zinc-500 uppercase">Tipo</label>
+                                <select v-model="manualEditForm.activity_type" class="w-full rounded-xl border-zinc-200 text-sm">
+                                    <option v-for="t in ['development','maintenance','meeting','research','documentation','review','support','planning']" :key="t" :value="t">
+                                        {{ getActivityTypeLabel(t) }}
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="space-y-1.5">
+                                <label class="text-xs font-bold text-zinc-500 uppercase">Descrição</label>
+                                <textarea v-model="manualEditForm.description" class="w-full rounded-xl border-zinc-200 text-sm" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="flex gap-3 mt-8">
+                            <button @click="saveManualEdit(editingEntry)" class="flex-1 bg-zinc-900 text-white font-bold py-3 rounded-xl hover:bg-zinc-800 transition">Salvar</button>
+                            <button @click="cancelManualEdit" class="px-6 text-zinc-500 font-bold hover:text-zinc-900 transition">Cancelar</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>
