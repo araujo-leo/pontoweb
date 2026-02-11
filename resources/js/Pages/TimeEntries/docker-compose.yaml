@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  pontoweb:
+    build: .
+    container_name: pontoweb
+    restart: always
+    volumes:
+      - ./.env:/var/www/.env
+    networks:
+      - caddy_network
+
+networks:
+  caddy_network:
+    external: true
