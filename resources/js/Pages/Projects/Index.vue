@@ -187,10 +187,14 @@ const formatCurrency = (value) => {
                                                 v-model="timerForm.activity_type"
                                                 class="w-full border-zinc-200 bg-white rounded-lg text-sm text-zinc-700 focus:ring-emerald-500 focus:border-emerald-500"
                                             >
-                                                <option value="development"> Desenvolvimento</option>
-                                                <option value="meeting"> Reunião</option>
-                                                <option value="planning"> Planejamento</option>
-                                                <option value="support"> Suporte</option>
+                                                <option value="development">🔧 Desenvolvimento</option>
+                                                <option value="maintenance">🛠️ Manutenção</option>
+                                                <option value="meeting">👥 Reunião</option>
+                                                <option value="research">🔍 Pesquisa</option>
+                                                <option value="documentation">📝 Documentação</option>
+                                                <option value="review">✅ Review</option>
+                                                <option value="support">💬 Suporte</option>
+                                                <option value="planning">📋 Planejamento</option>
                                             </select>
                                         </div>
                                         <div class="space-y-1">

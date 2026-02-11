@@ -87,11 +87,6 @@ const exportPdf = () => {
     window.location.href = route('time-entries.export-pdf') + '?' + params.toString();
 };
 
-const editingDescription = ref(null);
-const descriptionForm = useForm({
-    description: '',
-});
-
 const editingEntry = ref(null);
 const manualEditForm = useForm({
     start_time: '',
@@ -103,26 +98,6 @@ const manualEditForm = useForm({
 const attachmentForm = useForm({
     file: null,
 });
-
-const startEditDescription = (entryId, currentDescription) => {
-    editingDescription.value = entryId;
-    descriptionForm.description = currentDescription || '';
-};
-
-const saveDescription = (entryId) => {
-    descriptionForm.patch(route('time-entries.update-description', entryId), {
-        preserveScroll: true,
-        onSuccess: () => {
-            editingDescription.value = null;
-            descriptionForm.reset();
-        }
-    });
-};
-
-const cancelEdit = () => {
-    editingDescription.value = null;
-    descriptionForm.reset();
-};
 
 const startManualEdit = (entry) => {
     editingEntry.value = entry.id;
@@ -340,16 +315,8 @@ const formatCurrency = (value) => {
                                 </td>
 
                                 <td class="px-6 py-4 max-w-xs">
-                                    <div v-if="editingDescription === entry.id" class="space-y-2">
-                                        <textarea v-model="descriptionForm.description" class="w-full text-xs rounded-lg border-zinc-200" rows="2"></textarea>
-                                        <div class="flex gap-2">
-                                            <button @click="saveDescription(entry.id)" class="text-[10px] bg-emerald-600 text-white px-2 py-1 rounded">Salvar</button>
-                                            <button @click="cancelEdit" class="text-[10px] bg-zinc-200 text-zinc-600 px-2 py-1 rounded">Cancelar</button>
-                                        </div>
-                                    </div>
-                                    <div v-else class="relative group/desc">
+                                    <div class="relative">
                                         <p class="text-xs text-zinc-500 leading-relaxed italic">"{{ entry.description || 'Sem descrição' }}"</p>
-                                        <button @click="startEditDescription(entry.id, entry.description)" class="absolute -right-6 top-0 opacity-0 group-hover/desc:opacity-100 text-zinc-400">✏️</button>
 
                                         <div class="flex flex-wrap gap-2 mt-2">
                                             <div v-for="(file, i) in entry.attachments" :key="i" class="flex items-center gap-1 bg-zinc-100 px-1.5 py-0.5 rounded text-[10px]">
@@ -403,9 +370,14 @@ const formatCurrency = (value) => {
                             <div class="space-y-1.5">
                                 <label class="text-xs font-bold text-zinc-500 uppercase">Tipo</label>
                                 <select v-model="manualEditForm.activity_type" class="w-full rounded-xl border-zinc-200 text-sm">
-                                    <option v-for="t in ['development','maintenance','meeting','research','documentation','review','support','planning']" :key="t" :value="t">
-                                        {{ getActivityTypeLabel(t) }}
-                                    </option>
+                                    <option value="development">🔧 Desenvolvimento</option>
+                                    <option value="maintenance">🛠️ Manutenção</option>
+                                    <option value="meeting">👥 Reunião</option>
+                                    <option value="research">🔍 Pesquisa</option>
+                                    <option value="documentation">📝 Documentação</option>
+                                    <option value="review">✅ Review</option>
+                                    <option value="support">💬 Suporte</option>
+                                    <option value="planning">📋 Planejamento</option>
                                 </select>
                             </div>
                             <div class="space-y-1.5">
