@@ -23,6 +23,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/time-entries', [TimeEntryController::class, 'store'])->name('time-entries.store');
     Route::patch('/time-entries/{timeEntry}', [TimeEntryController::class, 'update'])->name('time-entries.update');
     Route::patch('/time-entries/{timeEntry}/description', [TimeEntryController::class, 'updateDescription'])->name('time-entries.update-description');
+    Route::post('/time-entries/{timeEntry}/attachment', [TimeEntryController::class, 'uploadAttachment'])->name('time-entries.upload-attachment');
+    Route::delete('/time-entries/{timeEntry}/attachment', [TimeEntryController::class, 'deleteAttachment'])->name('time-entries.delete-attachment');
+    Route::get('/time-entries/{timeEntry}/attachment/{index}', [TimeEntryController::class, 'downloadAttachment'])->name('time-entries.download-attachment');
+    Route::patch('/time-entries/{timeEntry}/manual-edit', [TimeEntryController::class, 'manualEdit'])->name('time-entries.manual-edit');
     Route::get('/time-report', [TimeEntryController::class, 'index'])->name('time-entries.index');
     Route::get('/time-report/export-csv', [TimeEntryController::class, 'exportCsv'])->name('time-entries.export-csv');
     Route::get('/time-report/export-pdf', [TimeEntryController::class, 'exportPdf'])->name('time-entries.export-pdf');
